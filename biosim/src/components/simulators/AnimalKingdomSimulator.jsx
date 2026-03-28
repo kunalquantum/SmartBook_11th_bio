@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { SimHeader, Btn, Badge } from '../ui'
 
 const PHYLA = [
@@ -59,6 +59,27 @@ function CoelomIcon({ type }) {
 export function AnimalKingdomSimulator() {
   const [idx, setIdx] = useState(0)
   const [flipped, setFlipped] = useState(false)
+  const cardRef = useRef(null)
+  const [tilt, setTilt] = useState({ x: 0, y: 0 })
+
+  const handleMouseMove = (e) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    const centerX = rect.width / 2
+    const centerY = rect.height / 2
+    
+    // Calculate rotation (-15 to 15 degrees)
+    const rotateX = ((y - centerY) / centerY) * -15
+    const rotateY = ((x - centerX) / centerX) * 15
+    
+    setTilt({ x: rotateX, y: rotateY })
+  }
+
+  const handleMouseLeave = () => {
+    setTilt({ x: 0, y: 0 })
+  }
 
   const go = (dir) => {
     setIdx(i => (i + dir + PHYLA.length) % PHYLA.length)
@@ -69,7 +90,7 @@ export function AnimalKingdomSimulator() {
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SimHeader icon="🐾" title="Animal Phyla — Flashcards" subtitle="Tap card to flip and reveal key features" color="var(--rose)" />
+      <SimHeader icon="🐾" title="Animal Phyla — Flashcards" subtitle="Hover to tilt, click to flip card" color="var(--rose)" />
 
       {/* Navigation */}
       <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
@@ -80,55 +101,93 @@ export function AnimalKingdomSimulator() {
         <Btn onClick={() => go(1)} color="var(--muted)">Next →</Btn>
       </div>
 
-      {/* Flip card */}
-      <div onClick={() => setFlipped(f => !f)} style={{ cursor: 'pointer', perspective: 1000, height: 210 }}>
+      {/* Main Flashcard Container */}
+      <div 
+        ref={cardRef}
+        onMouseMove={handleMouseMove}
+        onMouseLeave={handleMouseLeave}
+        onClick={() => setFlipped(f => !f)} 
+        style={{ cursor: 'pointer', perspective: 1200, height: 210, margin: '1rem 0' }}
+      >
+        {/* Parallax Wrapper */}
         <div style={{
-          position: 'relative', width: '100%', height: '100%',
-          transformStyle: 'preserve-3d',
-          transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+          width: '100%', height: '100%', transformStyle: 'preserve-3d',
+          transform: `rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+          transition: 'transform 0.15s cubic-bezier(0.2, 0.8, 0.2, 1)',
         }}>
-          {/* Front */}
+          {/* Flip Wrapper */}
           <div style={{
-            position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
-            background: `${p.color}10`, border: `2px solid ${p.color}40`,
-            borderRadius: 16, display: 'flex', flexDirection: 'column',
-            alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
-            zIndex: flipped ? 0 : 1,
-            boxShadow: `0 8px 24px ${p.color}20`
+            position: 'relative', width: '100%', height: '100%',
+            transformStyle: 'preserve-3d',
+            transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
+            transition: 'transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1.2)',
           }}>
-            <div style={{ fontSize: '3.5rem', filter: `drop-shadow(0 4px 8px ${p.color}40)`, transition: 'all 0.3s', transform: flipped ? 'scale(0.8)' : 'scale(1)' }}>{p.icon}</div>
-            <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.6rem', color: p.color, fontWeight: 600 }}>{p.name}</div>
-            <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Badge color={p.color}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <SymIcon type={p.symmetry} /> {p.symmetry}
-                </div>
-              </Badge>
-              <Badge color={p.color}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <CoelomIcon type={p.coelom} /> {p.coelom}
-                </div>
-              </Badge>
-            </div>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.63rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
-              Tap to reveal features →
-            </div>
-          </div>
+            {/* Front */}
+            <div style={{
+              position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
+              background: `${p.color}15`, border: `2px solid ${p.color}50`,
+              borderRadius: 16, display: 'flex', flexDirection: 'column',
+              alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+              zIndex: flipped ? 0 : 1,
+              boxShadow: `0 15px 35px ${p.color}25, inset 0 0 20px rgba(255,255,255,0.1)`,
+              overflow: 'hidden'
+            }}>
+              {/* Holographic Shine */}
+              <div style={{
+                position: 'absolute', inset: 0, borderRadius: 16, pointerEvents: 'none',
+                background: `radial-gradient(circle at ${50 + tilt.y * 3}% ${50 - tilt.x * 3}%, rgba(255,255,255,0.2) 0%, transparent 60%)`,
+                zIndex: 10, mixBlendMode: 'plus-lighter'
+              }} />
 
-          {/* Back */}
-          <div style={{
-            position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
-            transform: 'rotateY(180deg)',
-            background: `${p.color}15`, border: `2px solid ${p.color}50`,
-            borderRadius: 16, padding: '1.5rem',
-            display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem',
-          }}>
-            <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              <Badge color={p.color}>eg: {p.eg}</Badge>
+              {/* Parallax Content Layer */}
+              <div style={{
+                 display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem',
+                 transform: `translateZ(30px)`, transition: 'transform 0.1s'
+              }}>
+                <div style={{ fontSize: '3.5rem', filter: `drop-shadow(0 4px 8px ${p.color}40)`, transition: 'all 0.3s', transform: flipped ? 'scale(0.8)' : 'scale(1)' }}>{p.icon}</div>
+                <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.6rem', color: p.color, fontWeight: 600 }}>{p.name}</div>
+                <div style={{ display: 'flex', gap: '0.5rem' }}>
+                  <Badge color={p.color}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <SymIcon type={p.symmetry} /> {p.symmetry}
+                    </div>
+                  </Badge>
+                  <Badge color={p.color}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <CoelomIcon type={p.coelom} /> {p.coelom}
+                    </div>
+                  </Badge>
+                </div>
+                <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.63rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
+                  Tap to securely identify →
+                </div>
+              </div>
             </div>
-            <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.1rem', color: p.color }}>{p.name}</div>
-            <p style={{ fontSize: '0.82rem', lineHeight: 1.75, color: 'var(--text)' }}>{p.features}</p>
+
+            {/* Back */}
+            <div style={{
+              position: 'absolute', inset: 0, backfaceVisibility: 'hidden',
+              transform: 'rotateY(180deg)',
+              background: `${p.color}15`, border: `2px solid ${p.color}50`,
+              borderRadius: 16, padding: '1.5rem',
+              display: 'flex', flexDirection: 'column', justifyContent: 'center', gap: '0.75rem',
+              boxShadow: `0 15px 35px ${p.color}25, inset 0 0 20px rgba(255,255,255,0.1)`,
+            }}>
+               {/* Holographic Shine (Back) */}
+               <div style={{
+                position: 'absolute', inset: 0, borderRadius: 16, pointerEvents: 'none',
+                background: `radial-gradient(circle at ${50 - tilt.y * 3}% ${50 + tilt.x * 3}%, rgba(255,255,255,0.15) 0%, transparent 60%)`,
+                zIndex: 10, mixBlendMode: 'plus-lighter'
+              }} />
+
+              <div style={{ transform: `translateZ(20px)` }}>
+                <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                  <Badge color={p.color}>eg: {p.eg}</Badge>
+                </div>
+                <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.2rem', color: p.color, marginTop: '0.5rem' }}>{p.name}</div>
+                <p style={{ fontSize: '0.85rem', lineHeight: 1.75, color: 'var(--text)' }}>{p.features}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -137,9 +196,9 @@ export function AnimalKingdomSimulator() {
       <div style={{ display: 'flex', gap: '0.4rem', justifyContent: 'center' }}>
         {PHYLA.map((ph, i) => (
           <button key={ph.name} onClick={() => { setIdx(i); setFlipped(false) }} style={{
-            width: i === idx ? 20 : 8, height: 8, borderRadius: 4,
+            width: i === idx ? 24 : 8, height: 8, borderRadius: 4,
             background: i === idx ? p.color : 'var(--dim)',
-            border: 'none', cursor: 'pointer', transition: 'all 0.3s', padding: 0,
+            border: 'none', cursor: 'pointer', transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)', padding: 0,
           }} />
         ))}
       </div>

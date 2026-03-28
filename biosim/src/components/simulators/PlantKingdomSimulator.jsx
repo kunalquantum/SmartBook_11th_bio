@@ -95,26 +95,66 @@ export function PlantKingdomSimulator() {
           </div>
 
           <div style={{ position: 'relative', width: 160, height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-            <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)', filter: 'drop-shadow(0px 4px 12px rgba(0,0,0,0.2))' }}>
+            <svg width="160" height="160" viewBox="0 0 160 160" style={{ transform: 'rotate(-90deg)' }}>
+              <defs>
+                <filter id="glow-n" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="glow-2n" x="-30%" y="-30%" width="160%" height="160%">
+                  <feGaussianBlur stdDeviation="6" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+                <filter id="bright-glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="blur" />
+                  <feMerge>
+                    <feMergeNode in="blur" />
+                    <feMergeNode in="SourceGraphic" />
+                  </feMerge>
+                </filter>
+              </defs>
+
               {/* Sporophyte Cycle (2n) */}
               <circle cx="80" cy="80" r={r} fill="transparent"
                       stroke="#ff9800" strokeWidth="18"
                       strokeDasharray={`${x2nLen} ${c}`}
                       strokeDashoffset={-offset}
-                      style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-dashoffset 0.8s' }} />
+                      filter="url(#glow-2n)"
+                      style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-dashoffset 0.8s', opacity: 0.85 }} />
+                      
               {/* Gametophyte Cycle (n) */}
               <circle cx="80" cy="80" r={r} fill="transparent"
                       stroke="#00e5ff" strokeWidth="18"
                       strokeDasharray={`${nLen} ${c}`}
                       strokeDashoffset={-offset - x2nLen}
-                      style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-dashoffset 0.8s' }} />
+                      filter="url(#glow-n)"
+                      style={{ transition: 'stroke-dasharray 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), stroke-dashoffset 0.8s', opacity: 0.85 }} />
+
+              {/* Orbital Energy Particle */}
+              <g>
+                {/* 144 is 80 (cx) + 64 (r) */}
+                <circle cx="144" cy="80" r="4" fill="#ffffff" filter="url(#bright-glow)" />
+                <circle cx="144" cy="80" r="2" fill="#ffffff" />
+                <animateTransform attributeName="transform" type="rotate" from="0 80 80" to="360 80 80" dur="4s" repeatCount="indefinite" />
+              </g>
+              
+              <g>
+                <circle cx="144" cy="80" r="3" fill="#ffffff" filter="url(#bright-glow)" opacity="0.6" />
+                <animateTransform attributeName="transform" type="rotate" from="-10 80 80" to="350 80 80" dur="4s" repeatCount="indefinite" />
+              </g>
             </svg>
             <div style={{ position: 'absolute', display: 'flex', flexDirection: 'column', alignItems: 'center', pointerEvents: 'none' }}>
-              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: '#00e5ff' }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.2rem', fontWeight: 800, color: '#00e5ff', textShadow: '0 0 10px rgba(0,229,255,0.6)' }}>
                 {p.nPercent}%
               </div>
               <div style={{ width: 30, height: 1, background: 'var(--border)', margin: '4px 0' }} />
-              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1rem', fontWeight: 700, color: '#ff9800' }}>
+              <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '1.2rem', fontWeight: 800, color: '#ff9800', textShadow: '0 0 10px rgba(255,152,0,0.6)' }}>
                 {100 - p.nPercent}%
               </div>
             </div>

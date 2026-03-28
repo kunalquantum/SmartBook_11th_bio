@@ -30,12 +30,13 @@ const RANK_DESC = [
 
 export function TaxonomySimulator() {
   const [selected, setSelected] = useState(null)
+  const [hovered, setHovered] = useState(null)
   const [orgIdx, setOrgIdx] = useState(0)
   const org = ORGANISMS[orgIdx]
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-      <SimHeader icon="🔬" title="Taxonomic Hierarchy" subtitle="Click any rank to learn more" color="var(--cyan)" />
+      <SimHeader icon="🔬" title="Taxonomic Hierarchy" subtitle="Interactive 3D Isometric View" color="var(--cyan)" />
 
       {/* Organism selector */}
       <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
@@ -46,51 +47,68 @@ export function TaxonomySimulator() {
         ))}
       </div>
 
-      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '1rem 0', perspective: 1000 }}>
-        <div style={{ position: 'relative', width: 340, height: 340 }} onClick={() => setSelected(null)}>
+      <div style={{ width: '100%', height: 400, display: 'flex', justifyContent: 'center', alignItems: 'center', perspective: 1200, margin: '2rem 0' }}>
+        <div style={{ 
+          position: 'relative', width: 340, height: 340, 
+          transformStyle: 'preserve-3d', 
+          transform: 'rotateX(55deg) rotateZ(-45deg)',
+          transition: 'transform 0.5s',
+          cursor: 'grab'
+        }}>
           {RANKS.map((r, i) => {
             const size = 340 - i * 42
             const isActive = selected === i
+            const isHover = hovered === i
             const isMuted = selected !== null && selected !== i
+            
+            // Stack them on the Z axis
+            const baseZ = i * 25
+            const hoverZ = isHover || isActive ? baseZ + 35 : baseZ
+            
             return (
               <div
                 key={r.rank}
                 onClick={(e) => { e.stopPropagation(); setSelected(isActive ? null : i) }}
-                className={isActive ? 'animate-pulse-slow' : ''}
+                onMouseEnter={() => setHovered(i)}
+                onMouseLeave={() => setHovered(null)}
                 style={{
                   position: 'absolute',
-                  bottom: 0, left: '50%',
-                  transform: `translateX(-50%) ${isActive ? 'translateY(-10px) scale(1.02)' : ''}`,
+                  top: '50%', left: '50%',
                   width: size, height: size,
                   borderRadius: '50%',
-                  background: isActive ? r.color : `${r.color}15`,
-                  border: `2px solid ${isActive ? 'var(--bg)' : r.color}`,
+                  background: isActive ? r.color : `${r.color}25`,
+                  border: `2px solid ${isActive ? '#fff' : r.color}`,
                   cursor: 'pointer',
-                  transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                  zIndex: isActive ? 10 : i,
-                  display: 'flex', justifyContent: 'center',
-                  paddingTop: isActive ? '18px' : '10px',
-                  opacity: isMuted ? 0.4 : 1,
-                  boxShadow: isActive ? `0 15px 35px ${r.color}60, inset 0 0 20px rgba(255,255,255,0.2)` : 'none',
+                  transform: `translate(-50%, -50%) translateZ(${hoverZ}px)`,
+                  transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  zIndex: i,
+                  display: 'flex', justifyContent: 'center', alignItems: 'center',
+                  opacity: isMuted ? 0.2 : 1,
+                  boxShadow: isActive || isHover ? `0 10px 40px ${r.color}90, inset 0 0 20px rgba(255,255,255,0.4)` : `0 4px 10px rgba(0,0,0,0.3)`,
+                  backdropFilter: 'blur(4px)',
                 }}
               >
                 <div style={{
-                  color: isActive ? '#000' : 'var(--text)',
+                  transform: 'rotateZ(45deg) rotateX(-55deg)',
+                  color: isActive ? '#000' : (isHover ? r.color : 'var(--text)'),
                   fontFamily: '"DM Mono", monospace',
-                  fontSize: isActive ? '0.75rem' : '0.65rem',
-                  fontWeight: isActive ? 700 : 500,
+                  fontSize: isActive ? '1.1rem' : (isHover ? '0.9rem' : '0.8rem'),
+                  fontWeight: isActive || isHover ? 700 : 500,
                   textAlign: 'center',
                   pointerEvents: 'none',
-                  transition: 'all 0.3s'
+                  textShadow: isActive ? 'none' : '0 2px 4px rgba(0,0,0,0.8)',
+                  transition: 'all 0.3s',
+                  background: isActive ? 'rgba(255,255,255,0.8)' : (isHover ? 'rgba(0,0,0,0.6)' : 'transparent'),
+                  padding: isActive || isHover ? '6px 16px' : '2px 6px',
+                  borderRadius: 12,
+                  border: isActive ? `1px solid ${r.color}` : 'none'
                 }}>
                   {r.rank}
-                  <div style={{ 
-                    fontFamily: '"Outfit", sans-serif', 
-                    fontSize: isActive ? '0.9rem' : (i === 6 ? '0.8rem' : '0.75rem'), 
-                    marginTop: isActive ? 2 : -2 
-                  }}>
-                    {org.ranks[i]}
-                  </div>
+                  {(isActive || isHover) && (
+                    <div style={{ fontFamily: '"Outfit", sans-serif', fontSize: isActive ? '1.4rem' : '1.1rem', marginTop: 4, color: isActive ? '#000' : '#fff' }}>
+                      {org.ranks[i]}
+                    </div>
+                  )}
                 </div>
               </div>
             )
