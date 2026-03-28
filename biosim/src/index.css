@@ -1,0 +1,65 @@
+:root {
+  --bg:        #060d14;
+  --surface:   #0c1825;
+  --card:      #0f2236;
+  --card2:     #122840;
+  --border:    #1a3a5c;
+  --border2:   #204060;
+  --cyan:      #00e5ff;
+  --emerald:   #00e099;
+  --amber:     #ffb300;
+  --rose:      #ff4d6d;
+  --violet:    #8b5cf6;
+  --text:      #dce8f0;
+  --muted:     #5a7a90;
+  --dim:       #2a4a62;
+  --gcyan:     rgba(0, 229, 255, 0.12);
+  --gemerald:  rgba(0, 224, 153, 0.10);
+  --gamber:    rgba(255, 179, 0, 0.10);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body, #root {
+  height: 100%;
+}
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  overflow-x: hidden;
+}
+
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--border2); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse-glow {
+  0%, 100% { opacity: 0.6; }
+  50%       { opacity: 1; }
+}
+
+.animate-fadeUp {
+  animation: fadeUp 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s ease both;
+}
