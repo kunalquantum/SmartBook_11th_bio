@@ -46,36 +46,56 @@ export function TaxonomySimulator() {
         ))}
       </div>
 
-      {/* Pyramid */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.35rem' }}>
-        {RANKS.map((r, i) => {
-          const isActive = selected === i
-          const width = 100 - i * 10
-          return (
-            <div
-              key={r.rank}
-              onClick={() => setSelected(isActive ? null : i)}
-              style={{
-                width: `${width}%`,
-                padding: '7px 14px',
-                borderRadius: 8,
-                background: isActive ? `${r.color}20` : 'var(--surface)',
-                border: `1px solid ${isActive ? r.color : 'var(--border)'}`,
-                cursor: 'pointer',
-                transition: 'all 0.25s',
-                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-              }}
-            >
-              <div style={{ display: 'flex', gap: '0.75rem', alignItems: 'center' }}>
-                <span style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.62rem', color: r.color, width: 58 }}>
+      <div style={{ width: '100%', display: 'flex', justifyContent: 'center', margin: '1rem 0', perspective: 1000 }}>
+        <div style={{ position: 'relative', width: 340, height: 340 }} onClick={() => setSelected(null)}>
+          {RANKS.map((r, i) => {
+            const size = 340 - i * 42
+            const isActive = selected === i
+            const isMuted = selected !== null && selected !== i
+            return (
+              <div
+                key={r.rank}
+                onClick={(e) => { e.stopPropagation(); setSelected(isActive ? null : i) }}
+                className={isActive ? 'animate-pulse-slow' : ''}
+                style={{
+                  position: 'absolute',
+                  bottom: 0, left: '50%',
+                  transform: `translateX(-50%) ${isActive ? 'translateY(-10px) scale(1.02)' : ''}`,
+                  width: size, height: size,
+                  borderRadius: '50%',
+                  background: isActive ? r.color : `${r.color}15`,
+                  border: `2px solid ${isActive ? 'var(--bg)' : r.color}`,
+                  cursor: 'pointer',
+                  transition: 'all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
+                  zIndex: isActive ? 10 : i,
+                  display: 'flex', justifyContent: 'center',
+                  paddingTop: isActive ? '18px' : '10px',
+                  opacity: isMuted ? 0.4 : 1,
+                  boxShadow: isActive ? `0 15px 35px ${r.color}60, inset 0 0 20px rgba(255,255,255,0.2)` : 'none',
+                }}
+              >
+                <div style={{
+                  color: isActive ? '#000' : 'var(--text)',
+                  fontFamily: '"DM Mono", monospace',
+                  fontSize: isActive ? '0.75rem' : '0.65rem',
+                  fontWeight: isActive ? 700 : 500,
+                  textAlign: 'center',
+                  pointerEvents: 'none',
+                  transition: 'all 0.3s'
+                }}>
                   {r.rank}
-                </span>
-                <span style={{ fontSize: '0.85rem', fontWeight: 500 }}>{org.ranks[i]}</span>
+                  <div style={{ 
+                    fontFamily: '"Outfit", sans-serif', 
+                    fontSize: isActive ? '0.9rem' : (i === 6 ? '0.8rem' : '0.75rem'), 
+                    marginTop: isActive ? 2 : -2 
+                  }}>
+                    {org.ranks[i]}
+                  </div>
+                </div>
               </div>
-              <span style={{ fontSize: '0.62rem', color: 'var(--muted)' }}>Rank {i + 1}</span>
-            </div>
-          )
-        })}
+            )
+          })}
+        </div>
       </div>
 
       {selected !== null && (
