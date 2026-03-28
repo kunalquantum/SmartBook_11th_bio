@@ -12,6 +12,50 @@ const PHYLA = [
   { name: 'Echinodermata',  eg: 'Starfish, Sea urchin, Holothuria', color: '#f87171', icon: '⭐', symmetry: 'Radial (adult) / Bilateral (larva)', coelom: 'Eucoelomate', features: 'Water vascular system. Spiny endoskeleton. Pentamerous symmetry. Remarkable regeneration.' },
 ]
 
+function SymIcon({ type }) {
+  if (type.includes('Radial')) {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10"/><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/><line x1="4.93" y1="19.07" x2="19.07" y2="4.93"/>
+      </svg>
+    )
+  }
+  if (type.includes('Bilateral')) {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <path d="M3 12c0-5 4-9 9-9v18c-5 0-9-4-9-9z"/><path d="M21 12c0-5-4-9-9-9v18c5 0 9-4 9-9z"/><line x1="12" y1="2" x2="12" y2="22" strokeDasharray="3 3"/>
+      </svg>
+    )
+  }
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" strokeDasharray="4 2"/>
+    </svg>
+  )
+}
+
+function CoelomIcon({ type }) {
+  if (type === 'Acoelomate') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+        <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3" fill="var(--bg)" opacity="0.8"/>
+      </svg>
+    )
+  }
+  if (type === 'Pseudocoelomate') {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        <circle cx="12" cy="12" r="10" fill="currentColor" fillOpacity="0.4"/><circle cx="12" cy="12" r="4" fill="var(--bg)" opacity="0.9"/>
+      </svg>
+    )
+  }
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="7" fill="currentColor"/><circle cx="12" cy="12" r="3" fill="var(--bg)" opacity="0.9"/>
+    </svg>
+  )
+}
+
 export function AnimalKingdomSimulator() {
   const [idx, setIdx] = useState(0)
   const [flipped, setFlipped] = useState(false)
@@ -42,7 +86,7 @@ export function AnimalKingdomSimulator() {
           position: 'relative', width: '100%', height: '100%',
           transformStyle: 'preserve-3d',
           transform: flipped ? 'rotateY(180deg)' : 'rotateY(0deg)',
-          transition: 'transform 0.5s cubic-bezier(0.4,0,0.2,1)',
+          transition: 'transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)',
         }}>
           {/* Front */}
           <div style={{
@@ -50,14 +94,24 @@ export function AnimalKingdomSimulator() {
             background: `${p.color}10`, border: `2px solid ${p.color}40`,
             borderRadius: 16, display: 'flex', flexDirection: 'column',
             alignItems: 'center', justifyContent: 'center', gap: '0.75rem',
+            zIndex: flipped ? 0 : 1,
+            boxShadow: `0 8px 24px ${p.color}20`
           }}>
-            <div style={{ fontSize: '3rem' }}>{p.icon}</div>
-            <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.5rem', color: p.color }}>{p.name}</div>
+            <div style={{ fontSize: '3.5rem', filter: `drop-shadow(0 4px 8px ${p.color}40)`, transition: 'all 0.3s', transform: flipped ? 'scale(0.8)' : 'scale(1)' }}>{p.icon}</div>
+            <div style={{ fontFamily: '"Playfair Display", serif', fontSize: '1.6rem', color: p.color, fontWeight: 600 }}>{p.name}</div>
             <div style={{ display: 'flex', gap: '0.5rem' }}>
-              <Badge color={p.color}>{p.symmetry}</Badge>
-              <Badge color={p.color}>{p.coelom}</Badge>
+              <Badge color={p.color}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <SymIcon type={p.symmetry} /> {p.symmetry}
+                </div>
+              </Badge>
+              <Badge color={p.color}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <CoelomIcon type={p.coelom} /> {p.coelom}
+                </div>
+              </Badge>
             </div>
-            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.63rem', color: 'var(--muted)' }}>
+            <div style={{ fontFamily: '"DM Mono", monospace', fontSize: '0.63rem', color: 'var(--muted)', marginTop: '0.2rem' }}>
               Tap to reveal features →
             </div>
           </div>
